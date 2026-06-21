@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Kết quả phân lớp giai đoạn giấc ngủ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <header class="compact-header result-header">
+        <h1>KẾT QUẢ PHÂN LỚP GIAI ĐOẠN GIẤC NGỦ</h1>
+    </header>
+
+    <main>
+        <section class="result-section">
+
+            <h2>Hình ảnh tín hiệu đầu vào</h2>
+            <div class="chart-card">
+                <img src="{{ result.eeg_url }}" alt="EEG preview">
+            </div>
+
+            <h2>Thông tin tổng quan</h2>
+            <div class="summary-card">
+                <strong>Loại dữ liệu:</strong> {{ result.data_type }}
+                <br>
+                <strong>Mô hình sử dụng:</strong> {{ result.mode }}
+
+                {% if result.metrics %}
+                <br>
+                <strong>Accuracy:</strong> {{ "%.4f"|format(result.metrics.accuracy) }}
+                &nbsp; | &nbsp;
+                <strong>Macro-F1:</strong> {{ "%.4f"|format(result.metrics.macro_f1) }}
+                &nbsp; | &nbsp;
+                <strong>Weighted-F1:</strong> {{ "%.4f"|format(result.metrics.weighted_f1) }}
+                {% else %}
+                <br>
+                <em>Không có nhãn thật nên hệ thống không tính Accuracy/F1.</em>
+                {% endif %}
+            </div>
+
+            {% if result.true_hyp_url %}
+            <h2>Biểu đồ hypnogram nhãn thật</h2>
+            <div class="chart-card">
+                <img src="{{ result.true_hyp_url }}" alt="Ground truth hypnogram">
+            </div>
+            {% endif %}
+
+            <h2>Biểu đồ hypnogram dự đoán</h2>
+            <div class="chart-card">
+                <img src="{{ result.hyp_url }}" alt="Predicted hypnogram">
+            </div>
+
+            {% if result.compare_hyp_url %}
+            <h2>So sánh hypnogram nhãn thật và dự đoán</h2>
+            <div class="chart-card">
+                <img src="{{ result.compare_hyp_url }}" alt="Compare hypnogram">
+            </div>
+            {% endif %}
+
+            {% if result.conclusion %}
+            <h2>Kết luận tự động</h2>
+            <div class="conclusion-box">
+                <p>{{ result.conclusion }}</p>
+            </div>
+            {% endif %}
+
+            <h2>Phân bố giai đoạn ngủ dự đoán</h2>
+            <div class="chart-card small-chart">
+                <img src="{{ result.dist_url }}" alt="Stage distribution">
+            </div>
+
+            {% if result.confidence_url %}
+            <h2>Độ tin cậy dự đoán theo epoch</h2>
+            <div class="chart-card">
+                <img src="{{ result.confidence_url }}" alt="Confidence">
+            </div>
+            <p class="note-text">
+                Epoch có confidence cao là vùng mô hình dự đoán chắc chắn. Epoch có confidence thấp thường nằm ở vùng chuyển tiếp giữa các giai đoạn ngủ.
+            </p>
+            {% endif %}
+
+            {% if result.confusion_url %}
+            <h2>Ma trận nhầm lẫn</h2>
+            <div class="chart-card confusion-card">
+                <img src="{{ result.confusion_url }}" alt="Confusion matrix">
+            </div>
+            <p class="note-text">
+                Ma trận nhầm lẫn cho biết lớp nào dự đoán đúng nhiều và lớp nào thường bị nhầm với lớp khác.
+            </p>
+            {% endif %}
+
+            <p class="download-wrap">
+                <a class="download-btn" href="{{ result.csv_url }}">Tải file CSV dự đoán</a>
+            </p>
+
+            <h2>Bảng dự đoán 20 epoch đầu tiên</h2>
+            <table>
+                <tr>
+                    <th>Epoch</th>
+                    <th>Dự đoán</th>
+                    {% if result.preview and result.preview[0].true_stage is defined %}
+                    <th>Nhãn thật</th>
+                    {% endif %}
+                    <th>P(Wake)</th>
+                    <th>P(N1)</th>
+                    <th>P(N2)</th>
+                    <th>P(N3)</th>
+                    <th>P(REM)</th>
+                    <th>Confidence</th>
+                </tr>
+
+                {% for row in result.preview %}
+                <tr>
+                    <td>{{ row.epoch_index }}</td>
+                    <td>{{ row.pred_stage }}</td>
+                    {% if row.true_stage is defined %}
+                    <td>{{ row.true_stage }}</td>
+                    {% endif %}
+                    <td>{{ "%.3f"|format(row.prob_Wake) }}</td>
+                    <td>{{ "%.3f"|format(row.prob_N1) }}</td>
+                    <td>{{ "%.3f"|format(row.prob_N2) }}</td>
+                    <td>{{ "%.3f"|format(row.prob_N3) }}</td>
+                    <td>{{ "%.3f"|format(row.prob_REM) }}</td>
+                    <td>{{ "%.3f"|format(row.confidence) }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            <div class="back-wrap">
+                <a class="back-btn" href="{{ url_for('upload') }}">Quay lại</a>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

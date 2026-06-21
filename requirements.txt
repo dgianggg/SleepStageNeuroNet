@@ -1,0 +1,9 @@
+flask
+werkzeug
+numpy==1.26.4
+pandas
+matplotlib
+scikit-learn
+mne
+openpyxl
+torch==2.1.2

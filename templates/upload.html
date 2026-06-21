@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Tải dữ liệu dự đoán</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="compact-header">
+        <h1>CÔNG CỤ PHÂN LỚP GIAI ĐOẠN GIẤC NGỦ</h1>
+        <p>Chọn loại dữ liệu và tải file để thực hiện dự đoán.</p>
+    </header>
+
+    <main>
+        <section class="upload-panel upload-page-panel">
+            <form method="POST" enctype="multipart/form-data">
+                <div class="data-type-box">
+                    <label class="data-type-card">
+                        <input type="radio" name="data_type" value="processed" checked>
+                        <span>
+                            <strong>File tiền xử lý</strong>
+                            <small>Upload file .npz đã xử lý sẵn. Hệ thống tự nhận single/multi.</small>
+                        </span>
+                    </label>
+
+                    <label class="data-type-card">
+                        <input type="radio" name="data_type" value="raw">
+                        <span>
+                            <strong>File thô</strong>
+                            <small>Upload file .edf thô và file hypnogram/label đi kèm.</small>
+                        </span>
+                    </label>
+                </div>
+
+                <div id="processed-box" class="tool-box">
+                    <h3>1. Tải file đã tiền xử lý</h3>
+                    <label>Chọn file .npz:</label>
+                    <input type="file" name="processed_file" accept=".npz">
+                    <small>File .npz thường gồm x, y, fs, ch_names. Nếu có nhãn y, hệ thống sẽ tự tính Accuracy/F1 và vẽ biểu đồ so sánh.</small>
+                </div>
+
+                <div id="raw-box" class="tool-box hidden">
+                    <h3>1. Chọn chế độ mô hình cho file thô</h3>
+                    <div class="mode-box">
+                        <label><input type="radio" name="model_mode" value="single" checked> Single-channel</label>
+                        <label><input type="radio" name="model_mode" value="multi"> Multi-channel</label>
+                    </div>
+
+                    <h3>2. Tải dữ liệu thô và nhãn</h3>
+                    <label>Chọn file dữ liệu EEG/PSG thô (.edf):</label>
+                    <input type="file" name="raw_data_file" accept=".edf">
+                    <label>Chọn file hypnogram/label:</label>
+                    <input type="file" name="raw_label_file" accept=".txt,.csv,.xls,.xlsx">
+                    <small>Với file thô, hệ thống cần file tín hiệu .edf và file label/hypnogram để tính metric.</small>
+                </div>
+
+                <button type="submit">Xem kết quả</button>
+            </form>
+        </section>
+
+        {% if error %}
+        <div class="error-box"><strong>Lỗi:</strong> {{ error }}</div>
+        {% endif %}
+
+    </main>
+
+    <script>
+        const processedRadio = document.querySelector('input[name="data_type"][value="processed"]');
+        const rawRadio = document.querySelector('input[name="data_type"][value="raw"]');
+        const processedBox = document.getElementById("processed-box");
+        const rawBox = document.getElementById("raw-box");
+
+        function updateFormMode() {
+            if (processedRadio.checked) {
+                processedBox.classList.remove("hidden");
+                rawBox.classList.add("hidden");
+            } else {
+                processedBox.classList.add("hidden");
+                rawBox.classList.remove("hidden");
+            }
+        }
+        processedRadio.addEventListener("change", updateFormMode);
+        rawRadio.addEventListener("change", updateFormMode);
+        updateFormMode();
+    </script>
+</body>
+</html>
