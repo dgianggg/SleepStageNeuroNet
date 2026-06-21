@@ -42,9 +42,38 @@ from downstream.fine_tuning import Trainer, device
 UPLOAD_DIR = BASE_DIR / "uploads"
 RESULT_DIR = BASE_DIR / "static" / "results"
 CKPT_DIR = BASE_DIR / "checkpoints"
+import gdown
+
+CHECKPOINT_FOLDER_URL = "https://drive.google.com/drive/folders/1rFfmAdrdbtQs91X2M59HFzPK17d0ZnrV?usp=sharing"
+
+def ensure_checkpoints():
+    CKPT_DIR.mkdir(exist_ok=True)
+
+    required_files = [
+        "best_model_single.pth",
+        "best_model_multiple.pth",
+        "best_model_presingle.pth",
+        "best_model_premultiple.pth",
+    ]
+
+    missing = []
+    for filename in required_files:
+        path = CKPT_DIR / filename
+        if not path.exists() or path.stat().st_size < 1024 * 1024:
+            missing.append(filename)
+
+    if missing:
+        print("Downloading checkpoints from Google Drive...")
+        gdown.download_folder(
+            CHECKPOINT_FOLDER_URL,
+            output=str(CKPT_DIR),
+            quiet=False,
+            use_cookies=False,
+        )
 
 UPLOAD_DIR.mkdir(exist_ok=True)
 RESULT_DIR.mkdir(parents=True, exist_ok=True)
+ensure_checkpoints()
 
 CHECKPOINTS = {
     "single": {

@@ -3,3 +3,4 @@ static/results/*
 __pycache__/
 *.pyc
 .env
+checkpoints/*.pth

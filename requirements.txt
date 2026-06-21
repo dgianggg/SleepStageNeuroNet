@@ -7,3 +7,4 @@ scikit-learn
 mne
 openpyxl
 torch==2.1.2
+gdown
